@@ -9,28 +9,10 @@ use App\Http\Requests\StoreTask;
 use App\Http\Resources\Task\TaskCollection;
 use App\Http\Resources\Task\TaskResource;
 
-class TaskController extends Controller
+class Task2Controller extends Controller
 {
-    public function test(Request $request)
-    {
-        try {
-            $name = $request->name;
-            $email = $request->email;
 
-            return response()->json([
-                'name' => $name,
-                'email' => $email,
-                'message' => 'Test endpoint is working!'
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Task creation failed',
-                'error' =>  $e->getMessage()
-            ]);
-        }
-    }
-
-    public function getAllTask()
+    public function index()
     {
         try {
             $tasks = Task::all();
@@ -76,7 +58,7 @@ class TaskController extends Controller
         }
     }
 
-    public function edit($id)
+    public function show($id)
     {
         try {
             $tasks = Task::findOrFail($id);

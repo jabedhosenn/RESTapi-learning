@@ -1,59 +1,289 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Project Name:** API – C01
+**Architecture:** RESTful API
+**Authentication:** Laravel Sanctum
+**Data Format:** JSON
+**Base URL:** `{{BASE_URL}}`
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The **API – C01** provides a secure and scalable backend for user authentication and task management. The API follows RESTful principles and is designed to be easily consumable by web, mobile, and third-party applications.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+All protected endpoints are secured using **Laravel Sanctum**, ensuring token-based authentication. Requests and responses are standardized in **JSON format**, enabling predictable integration and easy debugging.
 
-## Learning Laravel
+The API is organized into modular sections:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+* Authentication (Auth)
+* Task Management
+* Supporting/Public APIs (Categories, Testing)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 2. Authentication & Security
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Authentication Method
 
-### Premium Partners
+This API uses **Laravel Sanctum** for authentication. After successful login, users receive an **access token**, which must be included in the request headers for all protected routes.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Required Headers (Authenticated Requests)
 
-## Contributing
+```
+Authorization: Bearer {access_token}
+Content-Type: application/json
+Accept: application/json
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+If the token is missing, invalid, or expired, the API will return a `401 Unauthorized` response.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 3. Authentication Module
 
-## Security Vulnerabilities
+### 3.1 Register User
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Endpoint:**
+`POST /v1/register`
 
-## License
+**Description:**
+Creates a new user account.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Request Body (JSON):**
+
+```json
+{
+  "name": "Jabed",
+  "email": "info1@jabed.com",
+  "password": "123456"
+}
+```
+
+**Response:**
+
+* Success message
+* User information
+* Authentication token (if configured)
+
+---
+
+### 3.2 Login User
+
+**Endpoint:**
+`POST /api/v1/login`
+
+**Description:**
+Authenticates a user and returns an access token.
+
+**Request Body (JSON):**
+
+```json
+{
+  "email": "info@jabed.com",
+  "password": "123456"
+}
+```
+
+**Response:**
+
+* Access token
+* Authenticated user details
+
+---
+
+### 3.3 Logout User
+
+**Endpoint:**
+`POST /v1/logout`
+
+**Authentication:** Required
+
+**Description:**
+Invalidates the current access token and logs the user out.
+
+**Headers:**
+
+```
+Authorization: Bearer {access_token}
+Accept: application/json
+```
+
+---
+
+## 4. Task Management Module
+
+The Task Management module allows authenticated users to create, view, update, and delete tasks. Each task is associated with the authenticated user to ensure data ownership and security.
+
+### Common Features
+
+* Token-protected endpoints
+* User-based task ownership
+* Support for file uploads (task images)
+
+---
+
+### 4.1 Create Task
+
+**Endpoint:**
+`POST /v1/tasks/create`
+
+**Authentication:** Required
+
+**Request Type:** `multipart/form-data`
+
+**Form Data Parameters:**
+
+| Field       | Type | Description         |
+| ----------- | ---- | ------------------- |
+| title       | text | Task title          |
+| description | text | Task description    |
+| image       | file | Optional task image |
+
+**Response:**
+
+* Task creation confirmation
+* Task details
+
+---
+
+### 4.2 Get All Tasks
+
+**Endpoint:**
+`GET /v1/get-all-task`
+
+**Authentication:** Required
+
+**Description:**
+Retrieves all tasks belonging to the authenticated user.
+
+**Response:**
+
+* List of tasks
+* Pagination (if enabled)
+
+---
+
+### 4.3 Edit Task (Fetch Single Task)
+
+**Endpoint:**
+`GET /v1/tasks/edit/{id}`
+
+**Authentication:** Required
+
+**Description:**
+Fetches task details for editing.
+
+**URL Parameter:**
+
+* `id` → Task ID
+
+**Response:**
+
+* Task information
+
+---
+
+### 4.4 Update Task
+
+**Endpoint:**
+`POST /v1/tasks/update/{id}`
+
+**Authentication:** Required
+
+**Request Body (JSON):**
+
+```json
+{
+  "title": "The Title",
+  "description": "test description update"
+}
+```
+
+**Response:**
+
+* Updated task data
+* Success message
+
+---
+
+### 4.5 Delete Task
+
+**Endpoint:**
+`DELETE /api/v1/tasks/delete/{id}`
+
+**Authentication:** Recommended
+
+**Description:**
+Deletes a task by ID.
+
+**Response:**
+
+* Deletion confirmation message
+
+---
+
+## 5. Categories Module
+
+### 5.1 Get All Categories
+
+**Endpoint:**
+`GET /api/v1/categories`
+
+**Description:**
+Returns a list of all available categories.
+
+**Authentication:** Not required
+
+---
+
+### 5.2 Categories with Products
+
+**Endpoint:**
+`GET /api/v1/categories-with-products`
+
+**Description:**
+Fetches categories along with their associated products.
+
+**Authentication:** Not required
+
+---
+
+## 6. Environment Variables
+
+The following Postman environment variables are used:
+
+| Variable       | Description                       |
+| -------------- | --------------------------------- |
+| `BASE_URL`     | Base URL of the API               |
+| `access_token` | Bearer token received after login |
+
+---
+
+## 7. Error Handling
+
+The API follows standard HTTP response codes:
+
+| Status Code | Meaning          |
+| ----------- | ---------------- |
+| 200         | Success          |
+| 201         | Resource created |
+| 401         | Unauthorized     |
+| 403         | Forbidden        |
+| 404         | Not Found        |
+| 422         | Validation Error |
+| 500         | Server Error     |
+
+Error responses are returned in JSON format with clear messages to aid debugging.
+
+---
+
+## 8. Conclusion
+
+This API is designed to be **secure, modular, and developer-friendly**, making it suitable for production-ready applications. With Laravel Sanctum-based authentication, consistent request/response structures, and well-defined modules, it supports scalable frontend and third-party integrations.
+
+For testing and exploration, the provided Postman collection serves as the primary reference and validation tool for all endpoints.
+
+---
+
+Jabed Hosen
